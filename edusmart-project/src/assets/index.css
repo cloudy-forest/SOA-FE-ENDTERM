@@ -1,0 +1,93 @@
+/* src/assets/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Trang thi */
+.timer-warning-15 { /* Dưới 15 phút */
+    @apply bg-yellow-50 border border-yellow-200 dark:bg-yellow-900/30 dark:border-yellow-700;
+}
+.timer-warning-15 .timer-label { @apply text-yellow-600 dark:text-yellow-400; }
+.timer-warning-15 .timer-time { @apply text-yellow-700 dark:text-yellow-300; }
+
+.timer-warning-5 { /* Dưới 5 phút */
+    @apply bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 timer-warning; 
+}
+.timer-warning-5 .timer-label { @apply text-red-600 dark:text-red-400; }
+.timer-warning-5 .timer-time { @apply text-red-700 dark:text-red-300; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+.timer-warning {
+    animation: pulse 1.5s infinite;
+}
+
+.question-number-btn {
+    @apply w-8 h-8 border rounded text-sm font-medium transition-all duration-150 ease-in-out flex items-center justify-center;
+}
+.question-number-btn:hover:not(.current):not(.answered):not(.flagged) {
+    @apply bg-gray-100 dark:bg-gray-700 scale-105;
+}
+.question-number-btn.current {
+    @apply bg-blue-600 text-white border-blue-600 ring-2 ring-blue-300 ring-offset-1 dark:ring-offset-gray-800 scale-110;
+}
+.question-number-btn.answered {
+    @apply bg-green-500 text-white border-green-500;
+}
+.question-number-btn.flagged {
+    @apply bg-yellow-500 text-white border-yellow-500;
+}
+.question-number-btn.answered.flagged {
+    @apply bg-green-500 text-white border-yellow-500 ring-1 ring-yellow-500 ring-offset-1 dark:ring-offset-gray-800;
+}
+
+.answer-option {
+    @apply border rounded-lg p-4 cursor-pointer transition-all duration-150 ease-in-out border-gray-200 dark:border-gray-700;
+}
+.answer-option:hover {
+    @apply bg-gray-50 dark:bg-gray-700/50;
+}
+.answer-option.selected {
+    @apply bg-blue-50 dark:bg-blue-900/30 border-blue-500 dark:border-blue-600 ring-1 ring-blue-500;
+}
+.answer-option input[type="radio"] {
+    @apply text-blue-600 focus:ring-blue-500;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); /* red-500 to red-600 */
+    transition: all 0.3s ease;
+}
+.submit-btn:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); /* red-600 to red-700 */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.modal-overlay {
+    background: rgba(17, 24, 39, 0.6); /* gray-900 with opacity */
+    backdrop-filter: blur(4px);
+}
+/* Bộ lọc */
+.filter-pill {
+    @apply cursor-pointer block text-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg transition-all duration-150;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-600;
+}
+
+.filter-pill-input:checked + .filter-pill {
+    @apply bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/40 dark:border-blue-600 dark:text-blue-300;
+    @apply ring-1 ring-blue-500;
+}
+
+/* ô bình luận */
+.comment-textarea {
+    @apply w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg;
+    @apply focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800;
+    @apply transition-colors duration-150;
+    resize: none;
+}
+.comment-textarea::placeholder {
+    @apply text-gray-400 dark:text-gray-500;
+}
