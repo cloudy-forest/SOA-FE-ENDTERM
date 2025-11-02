@@ -11,6 +11,8 @@ import { ExamDetailPage } from '../pages/exam/ExamDetailPage';
 import { FlashcardListPage } from '../pages/flashcards/FlashcardListPage';
 import { BlogListPage } from '../pages/blog/BlogListPage';
 import { LoginPage } from '../pages/auth/LoginPage';
+import { CourseDetailPage } from '../pages/courses/CourseDetailPage';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -22,6 +24,7 @@ const router = createBrowserRouter([
       },
       // Thêm các trang khác vào đây sau
       { path: 'courses', element: <CourseProgramPage /> },
+      { path: 'courses/:courseId', element: <CourseDetailPage />},
       { path: 'exams', element: <ExamListPage /> },
       { path: 'exam/detail/:examId', element: <ExamDetailPage /> },
       { path: 'flashcards', element: <FlashcardListPage /> },
