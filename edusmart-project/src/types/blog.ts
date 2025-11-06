@@ -1,7 +1,11 @@
 // src/types/blog.ts
 
 export type ArticleCategory = 
-  'study-tips' | 'news' | 'tutorials' | 'math' | 'english' | 'technology' | 'life-hacks';
+  'study-tips' | 'news' | 'tutorials' | 'math' | 'english' | 'technology' | 'life-hacks' |
+  'features' | 'courses' |
+  'ielts-review' | 'toeic-review' |
+  'ielts' | 'ielts-listening' | 'ielts-reading' | 'ielts-info' | 'ielts-tips' |
+  'toeic' | 'physics' | 'chemistry';
 
 export type ArticleSort = 'newest' | 'popular';
 

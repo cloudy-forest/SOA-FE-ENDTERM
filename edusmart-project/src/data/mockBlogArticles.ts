@@ -21,9 +21,17 @@ export const articleSortOptions: { id: ArticleSort; name: string }[] = [
 // Tạo 20 bài viết mẫu
 export const allArticles: Article[] = Array.from({ length: 20 }, (_, i) => {
   const id = i + 1;
-  const category = ['study-tips', 'news', 'tutorials', 'math', 'english', 'technology'][i % 6] as ArticleCategory;
+
+  // Tạo danh sách category mới để random (bao gồm cả 'ielts', 'toeic'...)
+  const categories: ArticleCategory[] = [
+    'study-tips', 'news', 'tutorials', 'math', 'english', 'technology',
+    'ielts', 'toeic', 'physics', 'chemistry', 'ielts-listening', 'ielts-tips',
+    'features', 'ielts-review', 'toeic-review'
+  ];
+  // Lấy category ngẫu nhiên từ danh sách trên
+  const category = categories[i % categories.length];
   const title = `Bài viết ${['Hướng dẫn', 'Mẹo', 'Phân tích'][i % 3]} về ${category.replace('-', ' ').toUpperCase()}`;
-  const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''); // Tạo slug đơn giản
+  const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
   
   return {
     id,
@@ -40,3 +48,63 @@ export const allArticles: Article[] = Array.from({ length: 20 }, (_, i) => {
     isFeatured: i === 0 || i === 1, // Bài 1 và 2 là nổi bật
   };
 });
+
+// 1. Dữ liệu cho BỘ LỌC CỘT TRÁI (Nested)
+export const mockBlogFilterCategories = [
+  {
+    name: 'Tìm hiểu về EduSmart',
+    subCategories: [
+      { id: 'features', name: 'Tính năng trên EduSmart' },
+      { id: 'courses', name: 'Khóa học' },
+    ],
+  },
+  {
+    name: 'Review của học viên',
+    subCategories: [
+      { id: 'ielts-review', name: 'Học viên IELTS' },
+      { id: 'toeic-review', name: 'Học viên TOEIC' },
+    ],
+  },
+  {
+    name: 'Luyện thi IELTS',
+    subCategories: [
+      { id: 'ielts', name: 'Tất cả IELTS' }, // ID này phải khớp với 'category' cũ
+      { id: 'ielts-listening', name: 'IELTS Listening' },
+      { id: 'ielts-reading', name: 'IELTS Reading' },
+      { id: 'ielts-info', name: 'Thông tin kỳ thi IELTS' },
+      { id: 'ielts-tips', name: 'Kinh nghiệm thi IELTS' },
+    ],
+  },
+  {
+    name: 'Luyện thi TOEIC',
+    subCategories: [
+      { id: 'toeic', name: 'Tất cả TOEIC' }, // ID này phải khớp
+    ],
+  },
+  {
+    name: 'Luyện thi THPT Quốc gia',
+    subCategories: [
+      { id: 'math', name: 'Môn Toán' }, // ID này phải khớp
+      { id: 'physics', name: 'Môn Lý' }, // ID này phải khớp
+      { id: 'chemistry', name: 'Môn Hóa' }, // ID này phải khớp
+    ],
+  },
+];
+
+// 2. Dữ liệu cho WIDGET "TÌM HIỂU THÊM" (Cột phải)
+export const mockSidebarLinks = [
+  { name: 'KHÓA HỌC IELTS INTENSIVE LISTENING', url: '/courses/1' },
+  { name: 'KHÓA HỌC IELTS INTENSIVE READING', url: '/courses/1' },
+  { name: 'KHÓA HỌC IELTS INTENSIVE SPEAKING', url: '/courses/1' },
+  { name: 'KHÓA HỌC IELTS INTENSIVE WRITING', url: '/courses/1' },
+  { name: 'KHÓA HỌC COMPLETE TOEIC', url: '/courses/1' },
+  { name: 'Cấu trúc đề thi IELTS', url: '/blog/cau-truc-de-thi-ielts' },
+  { name: 'Thang điểm IELTS và cách tính điểm', url: '/blog/thang-diem-ielts' },
+];
+
+// 3. Dữ liệu cho WIDGET "REVIEW" (Cột phải)
+export const mockSidebarReviews = [
+  { id: 1, title: 'Mình đã đạt 7.5 IELTS chỉ sau 3 tháng như thế nào?', url: '/blog/review-1' },
+  { id: 2, title: 'Từ mất gốc đến 850 TOEIC: Lộ trình tự học cho người đi làm', url: '/blog/review-2' },
+  { id: 3, title: 'Review chi tiết khóa IELTS Intensive Speaking của EduSmart', url: '/blog/review-3' },
+];
