@@ -11,11 +11,9 @@ export interface ExamQuestion {
 export interface ExamAttemptState {
   examId: string | null;
   title: string;
-  questions: ExamQuestion[];
   totalQuestions: number;
   durationMinutes: number;
   startTime: number | null; // Timestamp (Date.now()) khi bắt đầu
-  timeRemaining: number; // Số giây còn lại
   currentQuestionIndex: number; // Vị trí câu hỏi hiện tại (0 -> n-1)
   answers: Record<number, number>; // { [questionId]: answerIndex }
   flaggedQuestions: number[]; // Mảng các questionId được đánh dấu
