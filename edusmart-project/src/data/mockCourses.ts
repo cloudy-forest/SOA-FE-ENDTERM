@@ -8,6 +8,7 @@ import type {
 const createCourse = (id: number, partial: Partial<Course>): Course => ({
   id,
   title: `Khóa học mẫu ${id}`,
+  subject: 'english',
   instructor: 'Giảng viên EduSmart',
   image: `https://picsum.photos/seed/${id}/400/300`, // Ảnh mẫu
   category: 'math',

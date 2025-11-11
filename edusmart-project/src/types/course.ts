@@ -56,6 +56,7 @@ export interface FeedbackImage {
 export interface Course {
   id: number;
   title: string;
+  subject: string;
   instructor: string;
   image: string;
   category: CourseCategory;
