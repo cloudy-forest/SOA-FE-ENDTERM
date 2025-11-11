@@ -5,6 +5,8 @@ export interface ExamQuestion {
   id: number;
   content: string; // Nội dung câu hỏi (có thể chứa HTML)
   options: string[]; // Mảng các lựa chọn
+  correctAnswer: number;
+  explanation?: string; 
 }
 
 // Kiểu dữ liệu cho toàn bộ trạng thái (state) của bài thi

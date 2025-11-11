@@ -1,8 +1,8 @@
 // src/services/adminService.ts
 import { mockUsers } from '../data/mockAdminData';
-import type { AdminUser, Subject, AdminTransaction, DashboardStats, AdminExam } from '../types/admin';
+import type { AdminUser, Subject, AdminTransaction, DashboardStats, AdminExam, AdminExamDetails } from '../types/admin';
 // import type { TransactionStatus } from '../types/admin';
-import type { Exam } from '../types/exam';
+import type { Exam, ExamQuestion } from '../types/exam';
 import { allExams as mockExamData } from '../data/mockExams';
 import { allCourses } from '../data/mockCourses';
 import type { Course } from '../types/course';  
@@ -38,6 +38,28 @@ const transactionsDB: AdminTransaction[] = [
 // ▼▼▼ TẠO DATABASE "ẢO" CHO ĐỀ THI ▼▼▼
 // Dùng data gốc từ mockExams
 let examsDB: Exam[] = [...mockExamData];
+
+// ▼▼▼ TẠO DATABASE "ẢO" CHO CÂU HỎI ▼▼▼
+// Giả lập rằng mỗi đề thi trong examsDB có một danh sách câu hỏi
+// Chúng ta sẽ "bịa" ra data câu hỏi khi cần
+const generateMockQuestions = (examId: number, count: number): ExamQuestion[] => {
+  const questions: ExamQuestion[] = [];
+  for (let i = 1; i <= count; i++) {
+    questions.push({
+      id: (examId * 100) + i, // ID câu hỏi duy nhất
+      content: `Đây là nội dung câu hỏi ${i} của đề thi ${examId}?`,
+      options: [
+        `Lựa chọn A (Đúng)`,
+        `Lựa chọn B`,
+        `Lựa chọn C`,
+        `Lựa chọn D`,
+      ],
+      correctAnswer: 0, // Đáp án A là đúng
+      explanation: `Đây là giải thích chi tiết cho câu hỏi ${i}.`
+    });
+  }
+  return questions;
+};
 
 /**
  * Giả lập API: GET /api/admin/users
@@ -324,6 +346,86 @@ export const deleteExam = (examId: number): Promise<{ success: true }> => {
       // Xóa trong database "ảo"
       examsDB = examsDB.filter(exam => exam.id !== examId);
       resolve({ success: true });
+    }, FAKE_DELAY);
+  });
+};
+
+// --- ▼▼▼ BẮT ĐẦU CÁC HÀM API MỚI CHO CÂU HỎI ▼▼▼ ---
+//
+
+/**
+ * Giả lập API: GET /api/admin/exams/:examId/details
+ * (Lấy chi tiết đề thi VÀ danh sách câu hỏi)
+ */
+export const getExamDetailsWithQuestions = (examId: number): Promise<AdminExamDetails> => {
+  console.log(`(Giả lập API) Đang tải chi tiết và câu hỏi cho đề thi ID: ${examId}`);
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const exam = examsDB.find(e => e.id === examId);
+      if (!exam) {
+        return reject(new Error('Không tìm thấy đề thi.'));
+      }
+      
+      const examDetails: AdminExamDetails = {
+        id: exam.id,
+        title: exam.title,
+        subject: exam.subject,
+        duration: exam.duration,
+        questions: generateMockQuestions(exam.id, exam.questions), // Tạo câu hỏi "giả"
+      };
+      resolve(examDetails);
+      
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: DELETE /api/admin/questions/:questionId
+ */
+export const deleteQuestion = (questionId: number): Promise<{ success: true }> => {
+  console.log(`(Giả lập API) Đang xóa câu hỏi ID: ${questionId}`);
+  // (Trong app thật, chúng ta sẽ xóa khỏi DB. Ở đây, chúng ta chỉ giả vờ thành công)
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ success: true });
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: POST /api/admin/exams/:examId/questions
+ * (Tạo câu hỏi mới)
+ */
+export const createQuestion = (examId: number, data: Omit<ExamQuestion, 'id'>): Promise<ExamQuestion> => {
+  console.log(`(Giả lập API) Đang tạo câu hỏi mới cho đề thi ${examId}:`, data.content);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newQuestion: ExamQuestion = {
+        ...data,
+        id: Math.floor(Math.random() * 10000) + 1000, // ID ngẫu nhiên
+      };
+      // (Trong app thật, chúng ta sẽ thêm vào DB)
+      resolve(newQuestion);
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: PUT /api/admin/questions/:questionId
+ * (Cập nhật câu hỏi)
+ */
+export const updateQuestion = (questionId: number, data: Partial<ExamQuestion>): Promise<ExamQuestion> => {
+  console.log(`(Giả lập API) Đang cập nhật câu hỏi ID ${questionId}:`, data.content);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const updatedQuestion: ExamQuestion = {
+        id: questionId,
+        content: data.content || "Nội dung câu hỏi bị thiếu",
+        options: data.options || ['A', 'B', 'C', 'D'],
+        correctAnswer: data.correctAnswer || 0,
+        explanation: data.explanation || "",
+      };
+      resolve(updatedQuestion);
     }, FAKE_DELAY);
   });
 };

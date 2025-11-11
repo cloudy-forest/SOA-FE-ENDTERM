@@ -1,3 +1,5 @@
+import type { ExamQuestion } from "./exam";
+
 // src/types/admin.ts
 export type UserRole = 'admin' | 'user';
 export type UserStatus = 'active' | 'disabled';
@@ -58,4 +60,12 @@ export interface AdminExam {
   subject: string;
   questionCount: number;
   duration: number; // (số phút)
+}
+
+export interface AdminExamDetails {
+  id: number;
+  title: string;
+  subject: string;
+  duration: number;
+  questions: ExamQuestion[]; // <<< Danh sách các câu hỏi
 }
