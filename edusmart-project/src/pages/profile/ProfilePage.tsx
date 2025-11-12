@@ -3,7 +3,7 @@ import { useState, Fragment } from 'react';
 import { useAppSelector, useAppDispatch } from '../../app/hooks';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { useForm } from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import clsx from 'clsx';
 import { PencilIcon, MapPinIcon, PhoneIcon, EnvelopeIcon, XMarkIcon } from '@heroicons/react/24/outline';

@@ -1,6 +1,6 @@
 // src/pages/flashcards/components/FlashcardSetCard.tsx
 import { Link } from 'react-router-dom';
-import type { FlashcardSet } from '../../../types/flashcard';
+import type { FlashcardDetail } from '../../../types/flashcard';
 import { 
     ClipboardDocumentListIcon, EyeIcon, 
     PlusIcon, PencilIcon, BookOpenIcon 
@@ -11,7 +11,7 @@ import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 type CardType = 'personal' | 'studying' | 'public';
 
 interface FlashcardSetCardProps {
-  set: FlashcardSet;
+  set: FlashcardDetail;
   type: CardType; // 'personal', 'studying', hoặc 'public'
 }
 
@@ -21,7 +21,7 @@ interface FlashcardSetCardProps {
 const PersonalCardActions = ({ setId }: { setId: number }) => (
   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
     <Link
-      to={`/flashcards/learn/${setId}`} // (Sẽ tạo trang HỌC sau)
+      to={`/flashcards/${setId}`} // (Sẽ tạo trang HỌC sau)
       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
     >
       <BookOpenIcon className="w-4 h-4" />
@@ -56,7 +56,7 @@ const PersonalCardActions = ({ setId }: { setId: number }) => (
 const PublicCardActions = ({ setId }: { setId: number }) => (
   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
     <Link
-      to={`/flashcards/detail/${setId}`} // (Link đến trang Chi tiết bộ thẻ)
+      to={`/flashcards/${setId}`} // (Link đến trang Chi tiết bộ thẻ)
       className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
     >
       Chi tiết
@@ -84,7 +84,7 @@ const StudyingCardActions = ({ setId }: { setId: number }) => (
     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
       <p className="text-xs text-gray-500">Học lần cuối: 2 giờ trước</p>
       <Link
-        to={`/flashcards/learn/${setId}`}
+        to={`/flashcards/${setId}`}
         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
       >
         <BookOpenIcon className="w-4 h-4" />
@@ -100,7 +100,7 @@ export const FlashcardSetCard = ({ set, type }: FlashcardSetCardProps) => {
   return (
     // Bỏ thẻ Link ở ngoài để các nút bên trong bấm được
     <div className="group block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-5 transition-all duration-300 hover:shadow-lg">
-      <Link to={`/flashcards/detail/${set.id}`}>
+      <Link to={`/flashcards/${set.id}`}>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
           {set.title}
         </h3>
@@ -110,11 +110,11 @@ export const FlashcardSetCard = ({ set, type }: FlashcardSetCardProps) => {
       <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
         <span className="flex items-center" title="Số lượng thẻ">
           <ClipboardDocumentListIcon className="w-4 h-4 mr-1.5" />
-          {set.termCount} thẻ
+          {set.number_of_word} thẻ
         </span>
         <span className="flex items-center" title="Lượt xem">
           <EyeIcon className="w-4 h-4 mr-1.5" />
-          {set.views}
+          {set.views} 
         </span>
       </div>
       

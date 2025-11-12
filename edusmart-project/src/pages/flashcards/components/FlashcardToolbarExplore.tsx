@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '../../../app/hooks';
 import { useDebounced } from '../../../hooks/useDebounced';
 import { 
   flashcardSubjectFilters, flashcardLevelFilters, flashcardSortOptions 
-} from '../../../data/mockFlashcards';
+} from '../../../data/mockFlashcardData'; 
 import {
   setFlashcardSearchTerm,
   setFlashcardSortBy,
@@ -12,22 +12,18 @@ import {
   toggleFlashcardLevel,
   clearFlashcardFilters
 } from '../../../app/slices/flashcardFilterSlice';
-import type { FlashcardSort, FlashcardSubject, FlashcardLevel } from '../../../types/flashcard';
+import type { FlashcardSort, FlashcardSubject, FlashcardLevel, FilterOption } from '../../../types/flashcard'; // <-- Đã thêm FilterOption
 import { MagnifyingGlassIcon, ChevronDownIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react';
 import clsx from 'clsx';
 
-interface FilterOption {
-  id: string;
-  name: string;
-}
+// (Component FilterDropdown giữ nguyên, không đổi)
 interface FilterDropdownProps {
   title: string;
   options: FilterOption[];
   selected: string[];
   onToggle: (id: string) => void;
 }
-
 const FilterDropdown = ({ title, options, selected, onToggle }: FilterDropdownProps) => (
   <Menu as="div" className="relative inline-block text-left">
     <MenuButton className="inline-flex justify-center items-center gap-2 w-full rounded-md px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none">
@@ -67,6 +63,7 @@ const FilterDropdown = ({ title, options, selected, onToggle }: FilterDropdownPr
   </Menu>
 );
 
+
 export const FlashcardToolbarExplore = () => {
   const dispatch = useAppDispatch();
   const filters = useAppSelector(state => state.flashcardFilter);
@@ -95,24 +92,23 @@ export const FlashcardToolbarExplore = () => {
             onChange={(e) => setLocalSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
           />
-          <MagnifyingGlassIcon className="absolute left-3 top-10. -translate-y-1/2 w-5 h-5 text-gray-400" />
+          {/* ▼▼▼ SỬA LỖI TYPO: Đổi 'top-10.' thành 'top-1/2' ▼▼▼ */}
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         </div>
         
-        {/* Filter Dropdowns */}
+        {/* (Phần còn lại của JSX giữ nguyên) */}
         <div className="flex items-center gap-2">
           <FunnelIcon className="w-5 h-5 text-gray-500" />
           <FilterDropdown
             title="Môn học"
             options={flashcardSubjectFilters}
             selected={filters.subjects}
-            // ▼▼▼ 4. ÉP KIỂU (CAST) ID TRỞ LẠI ▼▼▼
             onToggle={(id) => dispatch(toggleFlashcardSubject(id as FlashcardSubject))}
           />
           <FilterDropdown
             title="Trình độ"
             options={flashcardLevelFilters}
             selected={filters.levels}
-            // ▼▼▼ 4. ÉP KIỂU (CAST) ID TRỞ LẠI ▼▼▼
             onToggle={(id) => dispatch(toggleFlashcardLevel(id as FlashcardLevel))}
           />
           {hasActiveFilters && (

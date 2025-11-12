@@ -11,7 +11,7 @@ import type {
     MockComment
 } from '../types/exam';
 
-// Helper tạo data nhanh
+// (Helper createExam giữ nguyên)
 const createExam = (id: number, partial: Partial<Exam>): Exam => ({
     id,
     title: `Đề thi mẫu số ${id}`,
@@ -33,7 +33,7 @@ const createExam = (id: number, partial: Partial<Exam>): Exam => ({
     ...partial,
 });
 
-// Tạo 50 đề thi mẫu
+// (allExams và các bộ lọc giữ nguyên)
 export const allExams: Exam[] = Array.from({ length: 50 }, (_, i) => {
   const id = i + 1;
   return createExam(id, {
@@ -44,7 +44,6 @@ export const allExams: Exam[] = Array.from({ length: 50 }, (_, i) => {
   });
 });
 
-// Dùng cho UI (component lọc)
 export const subjectFilters: { id: ExamSubject; name: string }[] = [
   { id: 'math', name: 'Toán học' },
   { id: 'physics', name: 'Vật lý' },
@@ -72,7 +71,7 @@ export const typeFilters: { id: ExamType; name: string }[] = [
 
 export const examSortOptions: { id: ExamSort; name: string }[] = [
   { id: 'newest', name: 'Mới nhất' },
-  { id: 'popular', name: 'Phổ biến nhất' }, // (Sẽ sort theo 'attempts')
+  { id: 'popular', name: 'Phổ biến nhất' },
   { id: 'attempts-low', name: 'Lượt thi (thấp-cao)' },
   { id: 'attempts-high', name: 'Lượt thi (cao-thấp)' },
 ];
@@ -96,15 +95,45 @@ export const mockComments: MockComment[] = [
  { id: 2, user: 'Mai Linh', avatarInitials: 'ML', time: '5 giờ trước', text: 'Mình làm được 42/50 câu. Phần tích phân hơi khó, cần ôn lại thêm.', likes: 8 },
  { id: 3, user: 'Đức Thành', avatarInitials: 'DT', time: '1 ngày trước', text: 'Đề hay, độ khó vừa phải. Lời giải rất dễ hiểu.', likes: 15 },
 ];
+
+// ▼▼▼ BẮT ĐẦU SỬA LỖI ▼▼▼
+
 // Data mẫu cho câu hỏi chi tiết
 const mockExam1Questions: ExamQuestion[] = Array.from({ length: 50 }, (_, i) => {
     const questionId = i + 1;
+    
+    // 1. THÊM "correctAnswer" VÀ "explanation" VÀO DATA NGUỒN
     const baseQuestions = [
-        { content: "Tìm tập xác định của hàm số <strong>y = √(x - 2) + 1/(x + 3)</strong>", options: ["D = [2; +∞) \\ {-3}", "D = [2; +∞)", "D = (-∞; -3) ∪ [2; +∞)", "D = (-3; +∞)"] },
-        { content: "Cho hàm số <strong>y = x³ - 3x + 1</strong>. Tìm giá trị cực đại của hàm số.", options: ["y = 3", "y = -1", "y = 1", "y = 2"] },
-        { content: "Tính đạo hàm của hàm số <strong>y = ln(x² + 1)</strong>", options: ["y' = 2x/(x² + 1)", "y' = 1/(x² + 1)", "y' = 2x", "y' = x/(x² + 1)"] },
-        { content: "Nguyên hàm của <strong>f(x) = sin(2x)</strong> là:", options: ["-1/2 * cos(2x) + C", "1/2 * cos(2x) + C", "-cos(2x) + C", "cos(2x) + C"] },
-        { content: "Thể tích khối chóp có diện tích đáy B và chiều cao h là:", options: ["V = 1/3 * B * h", "V = B * h", "V = 1/2 * B * h", "V = 3 * B * h"] },
+        { 
+          content: "Tìm tập xác định của hàm số <strong>y = √(x - 2) + 1/(x + 3)</strong>", 
+          options: ["D = [2; +∞) \\ {-3}", "D = [2; +∞)", "D = (-∞; -3) ∪ [2; +∞)", "D = (-3; +∞)"],
+          correctAnswer: 1, // Đáp án B
+          explanation: "Điều kiện 1: x - 2 ≥ 0 ⇔ x ≥ 2. Điều kiện 2: x + 3 ≠ 0 ⇔ x ≠ -3. Kết hợp 2 điều kiện, ta có D = [2; +∞)."
+        },
+        { 
+          content: "Cho hàm số <strong>y = x³ - 3x + 1</strong>. Tìm giá trị cực đại của hàm số.", 
+          options: ["y = 3", "y = -1", "y = 1", "y = 2"],
+          correctAnswer: 0, // Đáp án A
+          explanation: "y' = 3x² - 3. y' = 0 ⇔ x = 1 hoặc x = -1. Tại x = -1, hàm số đạt cực đại, y(-1) = 3."
+        },
+        { 
+          content: "Tính đạo hàm của hàm số <strong>y = ln(x² + 1)</strong>", 
+          options: ["y' = 2x/(x² + 1)", "y' = 1/(x² + 1)", "y' = 2x", "y' = x/(x² + 1)"],
+          correctAnswer: 0, // Đáp án A
+          explanation: "Áp dụng công thức (ln(u))' = u'/u, với u = x² + 1, ta có y' = 2x / (x² + 1)."
+        },
+        { 
+          content: "Nguyên hàm của <strong>f(x) = sin(2x)</strong> là:", 
+          options: ["-1/2 * cos(2x) + C", "1/2 * cos(2x) + C", "-cos(2x) + C", "cos(2x) + C"],
+          correctAnswer: 0, // Đáp án A
+          explanation: "Nguyên hàm của sin(ax) là -1/a * cos(ax) + C. Áp dụng với a=2."
+        },
+        { 
+          content: "Thể tích khối chóp có diện tích đáy B và chiều cao h là:", 
+          options: ["V = 1/3 * B * h", "V = B * h", "V = 1/2 * B * h", "V = 3 * B * h"],
+          correctAnswer: 0, // Đáp án A
+          explanation: "Đây là công thức cơ bản tính thể tích khối chóp."
+        },
     ];
     const baseQ = baseQuestions[i % baseQuestions.length];
 
@@ -112,10 +141,15 @@ const mockExam1Questions: ExamQuestion[] = Array.from({ length: 50 }, (_, i) => 
         id: questionId,
         content: `Câu ${questionId}: ${baseQ.content}`,
         options: baseQ.options,
+        // 2. THÊM 2 TRƯỜNG CÒN THIẾU VÀO ĐÂY
+        correctAnswer: baseQ.correctAnswer,
+        explanation: baseQ.explanation
     };
 });
 
-// Hàm giả lập fetch API
+// ▲▲▲ KẾT THÚC SỬA LỖI ▲▲▲
+
+// (Hàm fetchMockExamById giữ nguyên)
 export const fetchMockExamById = (examId: string): Promise<Exam> => {
     console.log(`(Mock API) Đang tải dữ liệu chi tiết cho đề thi ID: ${examId}`);
     
@@ -132,20 +166,20 @@ export const fetchMockExamById = (examId: string): Promise<Exam> => {
                     duration: 90,
                     questions: 50,
                     attempts: 1234,
-                    comments: mockComments.length, // Lấy độ dài thật
+                    comments: mockComments.length,
                     difficulty: 'Nâng cao',
                     createdAt: new Date('2025-10-20T10:00:00Z').toISOString(),
                     author: "Thầy Nguyễn Văn A",
                     authorTitle: "Giáo viên Chuyên Toán - ĐH Quốc Gia",
                     authorBio: "15 năm kinh nghiệm giảng dạy, chuyên luyện thi học sinh giỏi và ôn thi THPT Quốc gia. Tác giả của nhiều đầu sách tham khảo...",
-                    authorImage: "https://i.pravatar.cc/150?img=68", // Ảnh mẫu
+                    authorImage: "https://i.pravatar.cc/150?img=68",
                     description: `
                       <p>Đề thi thử THPT Quốc gia môn Toán này được biên soạn bám sát cấu trúc mới nhất của Bộ Giáo dục và Đào tạo.</p>
                       <p>Nội dung đề thi bao quát toàn bộ kiến thức trọng tâm, với các câu hỏi được phân bổ hợp lý từ mức độ nhận biết, thông hiểu, vận dụng đến vận dụng cao, giúp học sinh đánh giá chính xác năng lực.</p>
                       <p>Đây là tài liệu quý giá để các em rèn luyện kỹ năng, chiến thuật làm bài trước khi bước vào kỳ thi chính thức.</p>
                     `,
                     contentCoverage: mockContentCoverage, 
-                    detailedQuestions: mockExam1Questions, 
+                    detailedQuestions: mockExam1Questions, // Giờ đã hợp lệ
                     relatedExams: mockRelatedExams,
                     averageScore: 8.2,
                 };

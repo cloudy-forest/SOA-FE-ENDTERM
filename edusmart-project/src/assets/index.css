@@ -354,4 +354,39 @@
 
 }
 
-
+/* ▼▼▼ CSS CHO FLIPPABLE FLASHCARD ▼▼▼ */
+  
+  /* Container để giữ không gian 3D */
+  .flashcard-container {
+    perspective: 1000px;
+  }
+  
+  /* Thẻ (phần lật) */
+  .flashcard {
+    @apply w-full h-full relative transition-transform duration-500 ease-in-out;
+    transform-style: preserve-3d;
+  }
+  
+  /* Class 'flipped' sẽ được thêm/xóa bằng React state */
+  .flashcard.flipped {
+    transform: rotateY(180deg);
+  }
+  
+  /* Cả hai mặt thẻ */
+  .flashcard-front,
+  .flashcard-back {
+    @apply absolute w-full h-full p-6 rounded-xl shadow-lg border border-gray-200;
+    @apply flex items-center justify-center;
+    backface-visibility: hidden; /* Quan trọng: Ẩn mặt sau */
+  }
+  
+  /* Mặt trước */
+  .flashcard-front {
+    @apply bg-white dark:bg-gray-800;
+  }
+  
+  /* Mặt sau (đã bị lật 180 độ ban đầu) */
+  .flashcard-back {
+    @apply bg-blue-50 dark:bg-blue-900/30 border-blue-200;
+    transform: rotateY(180deg);
+  }

@@ -16,9 +16,11 @@ import { CourseDetailPage } from '../pages/courses/CourseDetailPage';
 import { ExamListPage } from '../pages/exam/ExamListPage';
 import { ExamDetailPage } from '../pages/exam/ExamDetailPage';
 import { ExamTakingPage } from '../pages/exam/ExamTakingPage';
+import { FlashcardStudyPage } from '../pages/flashcards/FlashcardStudyPage';
 import { FlashcardListPage } from '../pages/flashcards/FlashcardListPage';
 import { BlogListPage } from '../pages/blog/BlogListPage';
 import { LoginPage } from '../pages/auth/LoginPage';
+
 
 // Trang Protected (Người dùng)
 import { CheckoutPage } from '../pages/checkout/CheckoutPage';
@@ -65,6 +67,7 @@ const router = createBrowserRouter([
         children: [
           { path: 'profile', element: <ProfilePage /> },
           { path: 'checkout/:courseId', element: <CheckoutPage /> },
+          { path: 'flashcards/:flashcardId', element: <FlashcardStudyPage/> },
         ],
       },
     ],

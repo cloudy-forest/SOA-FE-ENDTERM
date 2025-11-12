@@ -1,6 +1,6 @@
 // src/pages/flashcards/components/TabExplore.tsx
 import { useMemo } from 'react';
-import { allFlashcardSets } from '../../../data/mockFlashcards';
+import { mockFlashcardDetails } from '../../../data/mockFlashcardData';
 import { useAppSelector, useAppDispatch } from '../../../app/hooks';
 import { setFlashcardPage } from '../../../app/slices/flashcardFilterSlice';
 import { FlashcardSetCard } from './FlashcardSetCard';
@@ -9,14 +9,17 @@ import { FlashcardToolbarExplore } from './FlashcardToolbarExplore';
 import { FilterSync } from './FilterSync';
 
 const CARDS_PER_PAGE = 9;
+const allFlashcardSets = mockFlashcardDetails;
 
 export const TabExplore = () => {
   const dispatch = useAppDispatch();
   const filters = useAppSelector(state => state.flashcardFilter);
 
-  // Lọc, Sắp xếp
+  // Lọc, Sắp xếp (ĐÃ SỬA)
   const filteredSets = useMemo(() => {
     let sets = [...allFlashcardSets];
+    
+    // Lọc (Giờ đã hoạt động)
     if (filters.searchTerm) {
       const searchTerm = filters.searchTerm.toLowerCase();
       sets = sets.filter(c => c.title.toLowerCase().includes(searchTerm) || c.description.toLowerCase().includes(searchTerm));
@@ -27,15 +30,28 @@ export const TabExplore = () => {
     if (filters.levels.length > 0) {
       sets = sets.filter(c => filters.levels.includes(c.level));
     }
+
+    // Sắp xếp (ĐÃ SỬA)
     switch (filters.sortBy) {
-      case 'popular': sets.sort((a, b) => b.views - a.views); break;
-      case 'term-count-desc': sets.sort((a, b) => b.termCount - a.termCount); break;
-      case 'newest': default: sets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); break;
+      case 'popular': 
+        sets.sort((a, b) => b.views - a.views); 
+        break;
+      // ▼▼▼ SỬA LỖI TYPO 'termCount' VÀ LOGIC SORT ▼▼▼
+      case 'words-desc': 
+        sets.sort((a, b) => b.number_of_word - a.number_of_word); 
+        break;
+      case 'words-asc': 
+        sets.sort((a, b) => a.number_of_word - b.number_of_word); 
+        break;
+      case 'newest': 
+      default: 
+        sets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); 
+        break;
     }
     return sets;
-  }, [filters]);
+  }, [filters]); // Dependency `filters` là đúng
 
-  // Phân trang
+  // Phân trang (Giữ nguyên)
   const totalPages = Math.ceil(filteredSets.length / CARDS_PER_PAGE);
   const paginatedSets = useMemo(() => {
     const start = (filters.page - 1) * CARDS_PER_PAGE;

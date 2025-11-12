@@ -1,10 +1,11 @@
 // src/pages/flashcards/components/TabMySets.tsx
 import { useState, useMemo } from 'react';
-import { myFlashcardSets } from '../../../data/mockFlashcards'; // Dùng data "của tôi"
+import { mockFlashcardDetails } from '../../../data/mockFlashcardData'; // Dùng data "của tôi"
 import { FlashcardSetCard } from './FlashcardSetCard';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { Link } from 'react-router-dom';
 
+const myFlashcardSets = mockFlashcardDetails;
 export const TabMySets = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
