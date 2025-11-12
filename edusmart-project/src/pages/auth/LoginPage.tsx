@@ -10,10 +10,9 @@ import { GoogleLogin } from '@react-oauth/google';
 import type { CredentialResponse } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 
-// Import hàm mới (đã sửa)
 import { loginWithUsername, registerWithUsername } from '../../services/authService';
 
-// --- (Các component con: GoogleLoginButton, OrDivider, AuthInput... giữ nguyên) ---
+// --- (Các component con giữ nguyên) ---
 const GoogleLoginButton = ({ onSuccess, onError }: { onSuccess: (res: CredentialResponse) => void, onError: () => void }) => (
   <div className="flex justify-center"><GoogleLogin onSuccess={onSuccess} onError={onError} shape="rectangular" theme="outline" size="large" width="320px" logo_alignment="left" /></div>
 );
@@ -38,9 +37,13 @@ export const LoginPage = () => {
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   
-  // ▼▼▼ 1. XÓA STATE "registerName" ▼▼▼
+  // State cho Đăng ký
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+
+  // ▼▼▼ 1. THÊM STATE MỚI ▼▼▼
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [registerError, setRegisterError] = useState<string | null>(null); // Lỗi cục bộ
 
   // Xử lý Google (giữ nguyên)
   const handleGoogleSuccess = (credentialResponse: CredentialResponse) => {
@@ -82,13 +85,23 @@ export const LoginPage = () => {
     }
   };
 
-  // ▼▼▼ 2. CẬP NHẬT HÀM ĐĂNG KÝ (Bỏ "name") ▼▼▼
+  // ▼▼▼ 2. CẬP NHẬT HÀM ĐĂNG KÝ (Thêm kiểm tra) ▼▼▼
   const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
+
+    // Xóa lỗi cũ
+    setRegisterError(null);
+
+    // BƯỚC KIỂM TRA MỚI
+    if (registerPassword !== registerConfirmPassword) {
+      setRegisterError('Mật khẩu xác nhận không khớp. Vui lòng thử lại.');
+      return; // Dừng hàm
+    }
+
+    // Nếu mật khẩu khớp, tiếp tục như cũ
     dispatch(authStart());
     try {
-      // Gọi hàm mới (chỉ 2 tham số)
       const newUserData = await registerWithUsername(registerUsername, registerPassword);
       dispatch(loginSuccess(newUserData));
       alert('Đăng ký thành công! Chào mừng bạn!');
@@ -97,6 +110,17 @@ export const LoginPage = () => {
       if (err instanceof Error) { dispatch(authFailed(err.message)); } 
       else { dispatch(authFailed('Lỗi không xác định')); }
     }
+  };
+
+  // Hàm xóa lỗi khi người dùng gõ
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRegisterPassword(e.target.value);
+    setRegisterError(null); // Xóa lỗi khi gõ
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRegisterConfirmPassword(e.target.value);
+    setRegisterError(null); // Xóa lỗi khi gõ
   };
 
   return (
@@ -142,17 +166,29 @@ export const LoginPage = () => {
               <TabPanel className="focus:outline-none">
                 <form onSubmit={handleEmailRegister} className="space-y-4">
                   
-                  {/* ▼▼▼ 3. XÓA Ô "Họ và tên" ▼▼▼ */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên đăng nhập</label>
                     <AuthInput type="text" value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} required />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mật khẩu</label>
-                    <AuthInput type="password" value={registerPassword} onChange={e => setRegisterPassword(e.target.value)} required />
+                    {/* ▼▼▼ 3. THÊM HÀM onChange MỚI ▼▼▼ */}
+                    <AuthInput type="password" value={registerPassword} onChange={handlePasswordChange} required />
                   </div>
 
-                  {error && <p className="text-sm text-center text-red-500">{error}</p>}
+                  {/* ▼▼▼ 4. THÊM Ô "XÁC NHẬN MẬT KHẨU" ▼▼▼ */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Xác nhận mật khẩu</label>
+                    <AuthInput type="password" value={registerConfirmPassword} onChange={handleConfirmPasswordChange} required />
+                  </div>
+                  
+                  {/* ▼▼▼ 5. HIỂN THỊ LỖI CỤC BỘ HOẶC LỖI API ▼▼▼ */}
+                  {(registerError || error) && (
+                    <p className="text-sm text-center text-red-500">
+                      {registerError || error}
+                    </p>
+                  )}
+                  
                   <button type="submit" disabled={isLoading} className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400">
                     {isLoading ? 'Đang xử lý...' : 'Tạo tài khoản'}
                   </button>

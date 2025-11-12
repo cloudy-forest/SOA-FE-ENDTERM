@@ -2,10 +2,15 @@
 export type AuthStatus = 'idle' | 'loading' | 'success' | 'failed';
 export interface UserProfile {
   id: string;
-  name: string;
+  name: string; // fullname trong APIDocs
   email: string;
   avatarUrl: string; // Link ảnh avatar
   role?: 'user' | 'admin';
+  phone?: string;
+  address?: string;
+  bannerUrl?: string; // Ảnh bìa
+  balance?: number; // Số dư tài khoản
+
 }
 
 // export interface AuthState {
