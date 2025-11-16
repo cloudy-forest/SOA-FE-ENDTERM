@@ -52,10 +52,10 @@ export interface FlashcardDetail {
   views: number;
   author: string;
   authorImage?: string;
-  // ▼▼▼ THÊM 3 TRƯỜNG MỚI ĐỂ LỌC ▼▼▼
   subject: FlashcardSubject;
   level: FlashcardLevel;
   createdAt: string; // ISO String (cho "Mới nhất")
+  bannerUrl?: string;
 }
 
 export type FlashcardSubject = 'toeic' | 'ielts' | 'vocab' | 'grammar';

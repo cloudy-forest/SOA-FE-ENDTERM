@@ -1,6 +1,6 @@
 // src/services/flashcardService.ts
-import type { FlashcardDetail } from '../types/flashcard';
-import { mockFlashcardDetails as initialSets } from '../data/mockFlashcardData';
+import type { FlashcardDetail, FlashcardWord } from '../types/flashcard';
+import { mockFlashcardDetails as initialSets, DEFAULT_BANNER_URL } from '../data/mockFlashcardData';
 
 const FAKE_DELAY = 300;
 
@@ -62,10 +62,45 @@ export const createFlashcardSet = (data: {
         subject: 'vocab', // (Hardcode mặc định)
         level: 'easy', // (Hardcode mặc định)
         createdAt: new Date().toISOString(),
+        bannerUrl: DEFAULT_BANNER_URL,
       };
       
       flashcardDB.unshift(newSet); // Thêm vào "DB giả"
       resolve(newSet);
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: POST /products/flash-card/{id}/words
+ *  (Thêm một từ mới vào bộ thẻ)
+ */
+export const addWordToSet = (
+  setId: number, 
+  // Dùng Omit để loại bỏ 'id' (vì 'id' sẽ do server tạo)
+  wordData: Omit<FlashcardWord, 'id'> 
+): Promise<FlashcardWord> => {
+  console.log(`(Giả lập API) Đang thêm từ "${wordData.text}" vào bộ thẻ ID: ${setId}`);
+  
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // Tìm bộ thẻ trong "database" giả
+      const setIndex = flashcardDB.findIndex(set => set.id === setId);
+      if (setIndex === -1) {
+        return reject(new Error("Không tìm thấy bộ thẻ."));
+      }
+      
+      const newWord: FlashcardWord = {
+        ...wordData,
+        id: Math.floor(Math.random() * 10000) + 1000, // ID từ vựng ngẫu nhiên
+      };
+      
+      // Cập nhật "database" giả
+      flashcardDB[setIndex].words.push(newWord);
+      // Cập nhật lại tổng số từ
+      flashcardDB[setIndex].number_of_word = flashcardDB[setIndex].words.length;
+      
+      resolve(newWord); // Trả về từ vừa tạo
     }, FAKE_DELAY);
   });
 };

@@ -66,6 +66,8 @@
 // src/data/mockFlashcardData.ts
 import type { FilterOption, FlashcardDetail } from '../types/flashcard';
 
+// export const DEFAULT_BANNER_URL = 'https://images.unsplash.com/photo-1504805572947-34fad45aed93?q=80&w=2070&auto-format&fit=crop';
+export const DEFAULT_BANNER_URL = 'https://plus.unsplash.com/premium_photo-1661382389422-42c09c4daeed?q=80&w=2067&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 // Đây là data chi tiết mà API /products/flash-card/{id} sẽ trả về
 export const mockFlashcardDetails: FlashcardDetail[] = [
   // Bộ thẻ 1 (Khớp với ID 1 ở FlashcardListPage)
@@ -86,6 +88,7 @@ export const mockFlashcardDetails: FlashcardDetail[] = [
     subject: 'toeic',
     level: 'easy',
     createdAt: '2025-11-10T10:00:00Z',
+    bannerUrl: DEFAULT_BANNER_URL,
   },
   // Bộ thẻ 2 (Khớp với ID 2)
   {
@@ -104,6 +107,7 @@ export const mockFlashcardDetails: FlashcardDetail[] = [
     subject: 'vocab',
     level: 'medium',
     createdAt: '2025-11-05T10:00:00Z',
+    bannerUrl: DEFAULT_BANNER_URL,
   },
   // Thêm các bộ thẻ khác nếu bạn muốn...
 ];

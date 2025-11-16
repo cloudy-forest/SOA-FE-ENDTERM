@@ -147,7 +147,7 @@ export const ProfilePage = () => {
         {/* 1. Phần Banner và Avatar */}
         <div className="relative h-48 md:h-64 bg-gray-300">
           <img 
-            src={user.bannerUrl || 'https://images.unsplash.com/photo-1504805572947-34fad45aed93?q=80&w=2070&auto=format&fit=crop'} 
+            src={user.bannerUrl || 'https://images.unsplash.com/photo-1635386508422-98555475ac60?q=80&w=2850&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'} 
             alt="Ảnh bìa" 
             className="w-full h-full object-cover"
           />
