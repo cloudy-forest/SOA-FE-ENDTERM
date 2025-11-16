@@ -6,8 +6,9 @@ import { TabMySets } from './components/TabMySets';
 import { TabStudying } from './components/TabStudying';
 import { TabExplore } from './components/TabExplore';
 import clsx from 'clsx';
+import { useAppSelector } from '../../app/hooks';
 
-const TABS = [
+const ALL_TABS = [
   { id: 'my-sets', name: 'Bộ thẻ của tôi' },
   { id: 'studying', name: 'Đang học' },
   { id: 'explore', name: 'Khám phá' },
@@ -16,9 +17,23 @@ const TABS = [
 export const FlashcardListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Đọc tab từ URL, mặc định là "my-sets"
-  const activeTab = searchParams.get('tab') || 'my-sets';
-  const selectedIndex = TABS.findIndex(t => t.id === activeTab);
+  // Kiểm tra trạng thái đăng nhập
+  const user = useAppSelector(state => state.auth.user);
+  const isLoggedIn = !!user;
+
+  // Lọc tab dựa trên đăng nhập
+  // Nếu đã đăng nhập, hiện cả 3. Nếu chưa, chỉ hiện "Khám phá"
+  const TABS = isLoggedIn ? ALL_TABS : [ALL_TABS[2]];
+
+  // Logic chọn tab 
+  // Đọc tab từ URL, mặc định là "my-sets" (nếu đã đăng nhập) hoặc 'explore' (nếu chưa)
+  const activeTab = searchParams.get('tab') || (isLoggedIn ? 'my-sets' : 'explore');
+
+  let selectedIndex = TABS.findIndex(t => t.id === activeTab);
+  // Nếu user chưa đăng nhập nhưng URL là ?tab=my-sets, tự động chuyển về tab 0
+  if (selectedIndex === -1) {
+    selectedIndex = 0;
+  }
 
   // Khi bấm chuyển tab -> Cập nhật URL
   const onTabChange = (index: number) => {
@@ -43,9 +58,9 @@ export const FlashcardListPage = () => {
       {/* Main Content (với Tabs) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <TabGroup selectedIndex={selectedIndex} onChange={onTabChange}>
-          {/* 1. Thanh Tabs (UI tối giản, không viền) */}
+          {/* 6. Thanh Tabs (Tự động ẩn/hiện) */}
           <TabList className="flex space-x-1 border-b border-gray-200 dark:border-gray-700 mb-6">
-            {TABS.map(tab => (
+            {TABS.map(tab => ( // 'TABS' giờ đã được lọc
               <Tab as={Fragment} key={tab.id}>
                 {({ selected }) => (
                   <button
@@ -64,17 +79,19 @@ export const FlashcardListPage = () => {
             ))}
           </TabList>
           
-          {/* 2. Nội dung các Tab */}
+          {/* 2. Nội dung các Tab (Render có điều kiện) */}
           <TabPanels>
-            <TabPanel className="focus:outline-none">
-              <TabMySets />
-            </TabPanel>
-            <TabPanel className="focus:outline-none">
-              <TabStudying />
-            </TabPanel>
-            <TabPanel className="focus:outline-none">
-              <TabExplore />
-            </TabPanel>
+            {isLoggedIn ? (
+              <>
+                {/* Đã đăng nhập: Hiện cả 3 */}
+                <TabPanel className="focus:outline-none"><TabMySets /></TabPanel>
+                <TabPanel className="focus:outline-none"><TabStudying /></TabPanel>
+                <TabPanel className="focus:outline-none"><TabExplore isLoggedIn={isLoggedIn} /></TabPanel>
+              </>
+            ) : (
+              // Chưa đăng nhập: Chỉ hiện 1
+              <TabPanel className="focus:outline-none"><TabExplore isLoggedIn={isLoggedIn} /></TabPanel>
+            )}
           </TabPanels>
         </TabGroup>
       </div>
