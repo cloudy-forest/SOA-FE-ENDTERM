@@ -15,7 +15,7 @@ import {
   BookOpenIcon,
   SpeakerWaveIcon // (Thêm icon Loa)
 } from '@heroicons/react/24/outline';
-
+import clsx from 'clsx';
 export const FlashcardStudyPage = () => {
   const { flashcardId } = useParams<{ flashcardId: string }>();
   const [details, setDetails] = useState<FlashcardDetail | null>(null);
@@ -66,6 +66,9 @@ export const FlashcardStudyPage = () => {
     return <div className="text-center p-12 text-red-500">{error || 'Không tìm thấy dữ liệu.'}</div>;
   }
 
+  // Biến kiểm tra xem có từ nào không
+  const hasWords = details.words.length > 0;
+  
   return (
     <>
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -94,10 +97,23 @@ export const FlashcardStudyPage = () => {
               <p className="text-gray-600 dark:text-gray-400">{details.description}</p>
             </div>
             
-            <button className="flex items-center justify-center bg-blue-600 text-white px-6 py-3 rounded-lg font-medium shadow-md hover:bg-blue-700">
+            <Link 
+              to={`/flashcards/${details.id}/study`}
+              // Thêm logic vô hiệu hóa (disable)
+              aria-disabled={!hasWords}
+              onClick={(e) => {
+                if (!hasWords) e.preventDefault(); // Ngăn click nếu không có từ
+              }}
+              className={clsx(
+                'flex items-center justify-center px-6 py-3 rounded-lg font-medium shadow-md',
+                !hasWords
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' // Style khi bị vô hiệu hóa
+                  : 'bg-blue-600 text-white hover:bg-blue-700' // Style khi bình thường
+              )}
+            >
               <BookOpenIcon className="w-5 h-5 mr-2" />
               Bắt đầu học ({details.number_of_word} thẻ)
-            </button>
+            </Link>
           </div>
 
           {/* 3. Dòng chú ý (Giữ nguyên) */}

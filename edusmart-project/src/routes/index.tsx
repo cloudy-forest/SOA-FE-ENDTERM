@@ -18,7 +18,9 @@ import { ExamDetailPage } from '../pages/exam/ExamDetailPage';
 import { ExamTakingPage } from '../pages/exam/ExamTakingPage';
 import { FlashcardStudyPage } from '../pages/flashcards/FlashcardStudyPage';
 import { FlashcardListPage } from '../pages/flashcards/FlashcardListPage';
+import { FlashcardLearnPage } from '../pages/flashcards/FlashcardLearnPage';
 import { BlogListPage } from '../pages/blog/BlogListPage';
+import { BlogWritePage } from '../pages/blog/BlogWritePage';
 import { LoginPage } from '../pages/auth/LoginPage';
 
 
@@ -68,6 +70,8 @@ const router = createBrowserRouter([
           { path: 'profile', element: <ProfilePage /> },
           { path: 'checkout/:courseId', element: <CheckoutPage /> },
           { path: 'flashcards/:flashcardId', element: <FlashcardStudyPage/> },
+          { path: 'flashcards/:flashcardId/study', element: <FlashcardLearnPage />},
+          { path: 'blog/create', element: <BlogWritePage /> },
         ],
       },
     ],

@@ -390,3 +390,39 @@
     @apply bg-blue-50 dark:bg-blue-900/30 border-blue-200;
     transform: rotateY(180deg);
   }
+
+  /* ▼▼▼ CSS TÙY CHỈNH CHO REACT QUILL DARK MODE ▼▼▼ */
+  .quill-container {
+    @apply rounded-lg border border-gray-300 dark:border-gray-600;
+  }
+  
+  /* Thanh Toolbar */
+  .quill-container .ql-toolbar {
+    @apply bg-gray-50 dark:bg-gray-800 rounded-t-lg border-b border-gray-300 dark:border-gray-600;
+  }
+
+  /* Vùng nhập liệu */
+  .quill-container .ql-container {
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-b-lg;
+    min-height: 300px;
+  }
+  
+  /* Chữ trong vùng nhập liệu */
+  .quill-container .ql-editor {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+  .quill-container .ql-editor.ql-blank::before {
+    @apply text-gray-400 dark:text-gray-500 not-italic;
+    content: "Nội dung bài viết của bạn...";
+  }
+
+  /* Màu của các icon trên toolbar (Dark mode) */
+  .dark .ql-snow .ql-stroke {
+    @apply stroke-gray-300;
+  }
+  .dark .ql-snow .ql-picker-label {
+    @apply text-gray-300;
+  }
+  .dark .ql-snow .ql-fill {
+    @apply fill-gray-300;
+  }
