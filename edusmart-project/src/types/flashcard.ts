@@ -39,6 +39,9 @@ export interface FlashcardWord {
   phonetic: string;     // "/wɜːrd/"
   type_of_text: string; // "noun"
   definition: string;   // "A single distinct meaningful element of speech or writing..."
+  example?: string;
+  image_url?: string;
+  note?: string;
 }
 
 // Dựa trên APIDocs: /products/flash-card/{id}

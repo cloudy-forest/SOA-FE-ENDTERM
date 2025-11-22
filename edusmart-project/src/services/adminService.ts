@@ -1,6 +1,6 @@
 // src/services/adminService.ts
 import { mockUsers } from '../data/mockAdminData';
-import type { AdminUser, Subject, AdminTransaction, DashboardStats, AdminExam, AdminExamDetails } from '../types/admin';
+import type { AdminUser, Subject, AdminTransaction, DashboardStats, AdminExam, AdminExamDetails, CreateExamInput, AdminBlog, BlogListResponse } from '../types/admin';
 // import type { TransactionStatus } from '../types/admin';
 import type { Exam, ExamQuestion } from '../types/exam';
 import { allExams as mockExamData } from '../data/mockExams';
@@ -60,6 +60,17 @@ const generateMockQuestions = (examId: number, count: number): ExamQuestion[] =>
   }
   return questions;
 };
+
+// Mock Data cho Blog
+const mockBlogs: AdminBlog[] = Array.from({ length: 25 }).map((_, index) => ({
+  id: index + 1,
+  title: `Bài viết mẫu số ${index + 1} về IELTS`,
+  subtitle: `Tóm tắt nội dung quan trọng của bài viết ${index + 1}...`,
+  content: '<p>Nội dung chi tiết...</p>',
+  writer: index % 2 === 0 ? 'Admin EduSmart' : 'Teacher Lan',
+  keywords: 'ielts, tips, vocabulary',
+  views: Math.floor(Math.random() * 1000)
+}));
 
 /**
  * Giả lập API: GET /api/admin/users
@@ -426,6 +437,94 @@ export const updateQuestion = (questionId: number, data: Partial<ExamQuestion>):
         explanation: data.explanation || "",
       };
       resolve(updatedQuestion);
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: POST /products/exams
+ * (Sử dụng FormData để upload file)
+ */
+export const createExam = async (data: CreateExamInput): Promise<void> => {
+  console.log("(Giả lập API) Đang tạo đề thi với FormData...");
+
+  // 1. Chuyển đổi object sang FormData (Mô phỏng việc gửi lên server)
+  const formData = new FormData();
+  formData.append('title', data.title);
+  formData.append('exam_type', data.exam_type);
+  formData.append('info', data.info);
+  formData.append('time', data.time.toString());
+  formData.append('part', data.part.toString());
+  formData.append('total_score', data.total_score.toString());
+  formData.append('completed', data.completed.toString());
+  formData.append('number_of_completion', data.number_of_completion.toString());
+  formData.append('number_of_question', data.number_of_question.toString());
+  formData.append('term', data.term);
+  formData.append('category_id', data.category_id.toString());
+  
+  if (data.thumbnail) {
+    formData.append('thumbnail', data.thumbnail);
+    console.log("File ảnh:", data.thumbnail.name);
+  }
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log("(Giả lập API) Đã tạo thành công!");
+      // Ở đây bạn sẽ gọi fetch thật:
+      // await fetch('/api/products/exams', { method: 'POST', body: formData });
+      resolve();
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: GET /products/blogs?keyword=&page=&limit
+ */
+export const fetchAdminBlogs = async (
+  keyword: string = '', 
+  page: number = 1, 
+  limit: number = 10
+): Promise<BlogListResponse> => {
+  console.log(`Fetching blogs: keyword="${keyword}", page=${page}, limit=${limit}`);
+  
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // 1. Lọc theo keyword
+      let filtered = mockBlogs;
+      if (keyword) {
+        const lowerTerm = keyword.toLowerCase();
+        filtered = mockBlogs.filter(b => 
+          b.title.toLowerCase().includes(lowerTerm) || 
+          b.writer.toLowerCase().includes(lowerTerm)
+        );
+      }
+
+      // 2. Tính toán phân trang
+      const total_pages = Math.ceil(filtered.length / limit);
+      const startIndex = (page - 1) * limit;
+      const paginatedBlogs = filtered.slice(startIndex, startIndex + limit);
+
+      // 3. Trả về đúng cấu trúc API
+      resolve({
+        total_pages,
+        current_page: page,
+        blogs: paginatedBlogs
+      });
+    }, FAKE_DELAY);
+  });
+};
+
+/**
+ * Giả lập API: DELETE /products/blogs/{id}
+ */
+export const deleteAdminBlog = async (id: number): Promise<void> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`Đã xóa blog ID: ${id}`);
+      // Trong thực tế, bạn sẽ xóa khỏi mảng mockBlogs
+      // const index = mockBlogs.findIndex(b => b.id === id);
+      // if (index !== -1) mockBlogs.splice(index, 1);
+      resolve();
     }, FAKE_DELAY);
   });
 };

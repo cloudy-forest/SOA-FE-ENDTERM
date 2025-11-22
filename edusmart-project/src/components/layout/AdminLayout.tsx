@@ -15,7 +15,8 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  NewspaperIcon
 } from '@heroicons/react/24/outline';
 
 // Menu (đã cập nhật icon)
@@ -25,6 +26,7 @@ const navigation = [
   { name: 'Quản lý Khóa học', to: 'courses', icon: BookOpenIcon },
   { name: 'Quản lý Chủ đề', to: 'subjects', icon: TagIcon },
   { name: 'Quản lý Đề thi', to: 'exams', icon: DocumentTextIcon },
+  { name: 'Quản lý Blog', to: 'blogs', icon: NewspaperIcon },
   { name: 'Quản lý Giao dịch', to: 'payments', icon: CreditCardIcon },
   { name: 'Gửi Thông báo', to: 'notifications', icon: BellIcon },
 ];

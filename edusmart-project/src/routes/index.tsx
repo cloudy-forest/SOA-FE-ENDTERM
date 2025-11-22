@@ -35,7 +35,9 @@ import { CourseManagementPage } from '../pages/admin/CourseManagementPage';
 import { CourseFormPage } from '../pages/admin/CourseFormPage';
 import { SubjectManagementPage } from '../pages/admin/SubjectManagementPage';
 import { ExamManagementPage } from '../pages/admin/ExamManagementPage';
+import { ExamCreatePage } from '../pages/admin/ExamCreatePage';
 import { ExamQuestionsPage } from '../pages/admin/ExamQuestionsPage';
+import { BlogManagementPage } from '../pages/admin/BlogManagementpage';
 
 // --- Trang Admin (Dùng Placeholder) ---
 // const AdminDashboardPage = () => <h1 className="text-3xl font-bold">Bảng điều khiển</h1>;
@@ -98,7 +100,9 @@ const router = createBrowserRouter([
           { path: 'courses/edit/:courseId', element: <CourseFormPage /> },
           { path: 'subjects', element: <SubjectManagementPage /> },
           { path: 'exams', element: <ExamManagementPage /> },
+          { path: 'exams/create', element: <ExamCreatePage/>},
           { path: 'exams/questions/:examId', element: <ExamQuestionsPage /> },
+          { path: 'blogs', element: <BlogManagementPage /> },
           { path: 'payments', element: <PaymentManagementPage /> },
           { path: 'notifications', element: <NotificationPage /> },
         ],

@@ -69,3 +69,38 @@ export interface AdminExamDetails {
   duration: number;
   questions: ExamQuestion[]; // <<< Danh sách các câu hỏi
 }
+
+export type ExamType = 'LISTENING' | 'READING' | 'WRITING' | 'SPEAKING';
+// Input khớp với API POST /products/exams
+export interface CreateExamInput {
+  title: string;
+  exam_type: ExamType;
+  info: string;
+  time: number;
+  part: number;
+  total_score: number;
+  completed: boolean; // Thường mặc định là false khi tạo mới
+  number_of_completion: number; // Thường mặc định là 0
+  number_of_question: number;
+  term: string;
+  thumbnail: File | null; // API yêu cầu MultipartFile
+  category_id: number; // ID của Subject
+}
+
+// Khớp với object trong mảng "blogs" của API
+export interface AdminBlog {
+  id: number;
+  title: string;
+  subtitle: string;
+  content: string;
+  writer: string;
+  keywords: string;
+  views: number;
+}
+
+// Khớp với response của GET /products/blogs
+export interface BlogListResponse {
+  total_pages: number;
+  current_page: number;
+  blogs: AdminBlog[];
+}
