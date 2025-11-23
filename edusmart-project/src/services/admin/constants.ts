@@ -1,0 +1,1 @@
+export const FAKE_DELAY = 500; // Giả lập 0.5s chờ mạng

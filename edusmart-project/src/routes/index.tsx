@@ -10,6 +10,7 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { AdminRoute } from '../components/auth/AdminRoute';
 
 // Trang Public (Người dùng)
+import { OAuth2RedirectHandler } from '../pages/auth/OAuth2RedirectHandler';
 import { HomePage } from '../pages/HomePage';
 import { CourseProgramPage } from '../pages/courses/CourseProgramPage';
 import { CourseDetailPage } from '../pages/courses/CourseDetailPage';
@@ -37,7 +38,7 @@ import { SubjectManagementPage } from '../pages/admin/SubjectManagementPage';
 import { ExamManagementPage } from '../pages/admin/ExamManagementPage';
 import { ExamCreatePage } from '../pages/admin/ExamCreatePage';
 import { ExamQuestionsPage } from '../pages/admin/ExamQuestionsPage';
-import { BlogManagementPage } from '../pages/admin/BlogManagementpage';
+import { BlogManagementPage } from '../pages/admin/BlogManagementPage';
 
 // --- Trang Admin (Dùng Placeholder) ---
 // const AdminDashboardPage = () => <h1 className="text-3xl font-bold">Bảng điều khiển</h1>;
@@ -64,6 +65,8 @@ const router = createBrowserRouter([
       { path: 'flashcards', element: <FlashcardListPage /> },
       { path: 'blog', element: <BlogListPage /> },
       { path: 'login', element: <LoginPage /> },
+      // Route này để đón người dùng từ Backend trở về
+      { path: 'oauth2/success', element: <OAuth2RedirectHandler /> },
       
       // Các trang Protected (lồng bên trong MainLayout)
       {

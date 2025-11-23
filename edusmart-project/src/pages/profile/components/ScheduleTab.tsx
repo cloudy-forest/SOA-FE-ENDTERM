@@ -2,47 +2,67 @@
 import { useState, useEffect, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import type { Schedule, ScheduleStatus } from '../../../types/schedule';
-import { deleteSchedule, createSchedule, getSchedules } from '../../../services/authService';
-import { Spinner } from '../../../components/ui/Spinner';
-import { PlusIcon, TrashIcon, XMarkIcon, PencilIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { 
+  Dialog, DialogPanel, DialogTitle, Transition, TransitionChild, 
+  Disclosure, DisclosureButton, DisclosurePanel 
+} from '@headlessui/react';
+import { 
+  PlusIcon, TrashIcon, XMarkIcon, ChevronUpIcon, 
+  CalendarDaysIcon, PencilIcon
+} from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
-// --- Form Inputs (Cho Modal) ---
+import type { Schedule, ScheduleStatus, ToDoList } from '../../../types/schedule';
+import { 
+  deleteSchedule, createSchedule, updateSchedule, getSchedules, 
+  getToDoListsBySchedule, createToDoList 
+} from '../../../services/auth/scheduleService';
+import { Spinner } from '../../../components/ui/Spinner';
+import { ToDoListBlock } from './ToDoListBlock';
+
+// --- Form Inputs ---
 type ScheduleFormInputs = {
   title: string;
   description: string;
   status: ScheduleStatus;
 };
 
-// --- Component Modal (Form Tạo/Sửa Lịch học) ---
+// --- Component Modal Tạo/Sửa Lịch ---
 const ScheduleFormModal = ({
   isOpen,
   onClose,
   onSubmit,
+  initialData
 }: {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ScheduleFormInputs) => Promise<void>;
-  // (Chúng ta sẽ thêm 'defaultValues' cho chức năng Sửa sau)
+  initialData?: Schedule | null;
 }) => {
-  
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = 
+  // ▼▼▼ SỬA LỖI 1: Thêm 'errors' vào đây ▼▼▼
+  const { register, handleSubmit, reset, setValue, formState: { isSubmitting, errors } } = 
     useForm<ScheduleFormInputs>({
-      defaultValues: {
-        title: '',
-        description: '',
-        status: 'planning', // Mặc định
-      }
+      defaultValues: { title: '', description: '', status: 'planning' }
     });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setValue('title', initialData.title);
+        setValue('description', initialData.description);
+        setValue('status', initialData.status);
+      } else {
+        reset({ title: '', description: '', status: 'planning' });
+      }
+    }
+  }, [isOpen, initialData, setValue, reset]);
 
   const handleFormSubmit: SubmitHandler<ScheduleFormInputs> = async (data) => {
     await onSubmit(data);
-    reset(); // Xóa form sau khi submit
+    onClose();
   };
-  
-  // Đóng modal và reset form
+
+  // ▼▼▼ SỬA LỖI 2: Khai báo hàm handleClose ▼▼▼
   const handleClose = () => {
     reset();
     onClose();
@@ -57,36 +77,42 @@ const ScheduleFormModal = ({
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
             <TransitionChild as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <DialogPanel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                  Tạo Lịch học mới
-                </DialogTitle>
-                <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                  <XMarkIcon className="w-6 h-6" />
-                </button>
+              <DialogPanel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all">
+                <div className="flex justify-between items-center mb-4">
+                  <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                    {initialData ? 'Cập nhật Lịch học' : 'Tạo Lịch học mới'}
+                  </DialogTitle>
+                  <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+                    <XMarkIcon className="w-6 h-6" />
+                  </button>
+                </div>
                 
-                <form onSubmit={handleSubmit(handleFormSubmit)} className="mt-4 space-y-4">
+                <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tiêu đề</label>
-                    <input {...register('title', { required: 'Tiêu đề là bắt buộc' })} className="form-input" />
+                    <input 
+                      {...register('title', { required: 'Tiêu đề là bắt buộc' })} 
+                      className="form-input w-full" 
+                      placeholder="VD: Lộ trình TOEIC 2 tháng" 
+                    />
+                    {/* ▼▼▼ SỬA LỖI 1: Dùng biến 'errors' ở đây ▼▼▼ */}
                     {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                    <textarea {...register('description')} className="form-input" rows={3} />
+                    <textarea {...register('description')} className="form-input w-full" rows={3} placeholder="Mục tiêu, ghi chú..." />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                    <select {...register('status')} className="form-input">
+                    <select {...register('status')} className="form-input w-full">
                       <option value="planning">Đang lên kế hoạch</option>
                       <option value="in_progress">Đang thực hiện</option>
                       <option value="completed">Đã hoàn thành</option>
                     </select>
                   </div>
-                  
-                  <div className="pt-4">
-                    <button type="submit" disabled={isSubmitting} className="flex items-center justify-center bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400">
-                      {isSubmitting ? <Spinner size="sm" /> : 'Tạo Lịch học'}
+                  <div className="pt-2 flex justify-end">
+                    <button type="submit" disabled={isSubmitting} className="flex items-center bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-colors">
+                      {isSubmitting ? <Spinner size="sm" className="text-white" /> : (initialData ? 'Lưu thay đổi' : 'Tạo Lịch')}
                     </button>
                   </div>
                 </form>
@@ -99,136 +125,156 @@ const ScheduleFormModal = ({
   );
 };
 
+// --- Component Accordion (Giữ nguyên logic cũ) ---
+const ScheduleAccordionItem = ({ schedule, onDelete, onEdit }: { schedule: Schedule, onDelete: (id: number) => void, onEdit: (s: Schedule) => void }) => {
+  const [todos, setTodos] = useState<ToDoList[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoadingTodos, setIsLoadingTodos] = useState(false);
 
-// --- Component Tab (Chính) ---
+  const statusColors = { planning: 'bg-blue-500', in_progress: 'bg-green-500', completed: 'bg-gray-500' };
+  const statusText = { planning: 'Lên kế hoạch', in_progress: 'Đang thực hiện', completed: 'Hoàn thành' };
+
+  const handleToggle = async (isOpen: boolean) => {
+    if (isOpen && !isLoaded) {
+      setIsLoadingTodos(true);
+      try {
+        const data = await getToDoListsBySchedule(schedule.id);
+        setTodos(data);
+        setIsLoaded(true);
+      } finally { setIsLoadingTodos(false); }
+    }
+  };
+
+  const handleAddToDo = async () => {
+    const title = prompt("Tên danh sách (VD: Ngày 1):");
+    if (title) {
+      const newTodo = await createToDoList(schedule.id, { title, type: 'Custom', implemented_date: new Date().toISOString().split('T')[0] });
+      setTodos([...todos, newTodo]);
+    }
+  };
+
+  return (
+    <Disclosure as="div" className="mb-4 border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden">
+      {({ open }) => {
+        if (open && !isLoaded && !isLoadingTodos) setTimeout(() => handleToggle(true), 0);
+        return (
+        <>
+          <DisclosureButton className="w-full flex items-stretch min-h-[80px] hover:bg-gray-50 transition-colors focus:outline-none text-left group">
+            <div className={clsx("w-2 flex-shrink-0", statusColors[schedule.status])}></div>
+            <div className="flex-1 flex items-center justify-between p-4">
+              <div className="flex-1 pr-4">
+                <div className="flex items-center gap-3 mb-1">
+                  <h3 className="text-lg font-bold text-gray-900">{schedule.title}</h3>
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">{statusText[schedule.status]}</span>
+                </div>
+                <p className="text-sm text-gray-500 line-clamp-1">{schedule.description}</p>
+                <p className="text-xs text-gray-400 mt-1">Created: {new Date(schedule.created_date).toLocaleDateString('vi-VN')}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div onClick={(e) => { e.stopPropagation(); onEdit(schedule); }} className="p-2 text-gray-300 hover:text-blue-500 rounded-full hover:bg-blue-50 transition-all"><PencilIcon className="w-5 h-5" /></div>
+                <div onClick={(e) => { e.stopPropagation(); onDelete(schedule.id); }} className="p-2 text-gray-300 hover:text-red-500 rounded-full hover:bg-red-50 transition-all"><TrashIcon className="w-5 h-5" /></div>
+                <ChevronUpIcon className={`${open ? 'rotate-180' : ''} h-5 w-5 text-gray-400 transition-transform duration-200`} />
+              </div>
+            </div>
+          </DisclosureButton>
+          <DisclosurePanel className="bg-gray-50/50 border-t border-gray-200 p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-sm font-semibold text-gray-700 uppercase">Danh sách công việc</h4>
+              <button onClick={handleAddToDo} className="text-sm bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-50 flex items-center shadow-sm"><PlusIcon className="w-4 h-4 mr-1.5" /> Thêm danh sách</button>
+            </div>
+            {isLoadingTodos ? <div className="flex justify-center py-4"><Spinner size="sm" /></div> : todos.length > 0 ? (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {todos.map(todo => (
+                  <ToDoListBlock key={todo.id} todo={todo} onDeleteBlock={(id) => setTodos(todos.filter(t => t.id !== id))} />
+                ))}
+              </div>
+            ) : <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg"><p className="text-gray-400 text-sm">Chưa có việc làm.</p></div>}
+          </DisclosurePanel>
+        </>
+      )}}
+    </Disclosure>
+  );
+};
+
+// --- Main Component ---
 export const ScheduleTab = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
 
-  // Tải data
   const loadSchedules = async () => {
     try {
       setLoading(true);
-      setError(null);
       const data = await getSchedules();
       setSchedules(data.list_schedule);
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Lỗi không xác định khi tải lịch học.');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    loadSchedules();
-  }, []);
+  useEffect(() => { loadSchedules(); }, []);
 
-  // Xử lý Tạo mới
-  const handleSubmit = async (data: ScheduleFormInputs) => {
+  const handleSave = async (data: ScheduleFormInputs) => {
     try {
-      await createSchedule(data);
-      setIsModalOpen(false); // Đóng modal
-      await loadSchedules(); // Tải lại danh sách
-    } catch (err: unknown) {
-      if (err instanceof Error) alert(`Lỗi: ${err.message}`);
-      else alert('Lỗi không xác định.');
-    }
-  };
-
-  // Xử lý Xóa
-  const handleDelete = async (schedule: Schedule) => {
-    if (window.confirm(`Bạn có chắc muốn xóa lịch học "${schedule.title}"?`)) {
-      try {
-        await deleteSchedule(schedule.id);
-        await loadSchedules(); // Tải lại
-      } catch (err: unknown) {
-        if (err instanceof Error) alert(`Lỗi: ${err.message}`);
-        else alert('Lỗi không xác định khi xóa.');
+      if (editingSchedule) {
+        await updateSchedule(editingSchedule.id, data);
+      } else {
+        await createSchedule(data);
       }
-    }
+      setIsModalOpen(false);
+      setEditingSchedule(null);
+      loadSchedules();
+    } catch { alert("Lỗi khi lưu lịch học."); }
   };
-  
-  // Hiển thị Badge theo Status
-  const statusBadge = (status: ScheduleStatus) => {
-    switch (status) {
-      case 'in_progress': return 'badge-success'; // Màu xanh lá
-      case 'planning': return 'badge-info'; // Màu xanh dương
-      case 'completed': return 'badge-warning'; // Màu vàng/cam
-      default: return 'badge-info';
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Xóa lịch trình này?')) {
+      await deleteSchedule(id);
+      loadSchedules();
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center p-12"><Spinner /></div>;
-  }
-  
-  if (error) {
-    return <div className="text-red-500 p-6">{error}</div>;
-  }
+  const openCreateModal = () => {
+    setEditingSchedule(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (schedule: Schedule) => {
+    setEditingSchedule(schedule);
+    setIsModalOpen(true);
+  };
+
+  if (loading) return <div className="flex justify-center p-12"><Spinner /></div>;
 
   return (
-    <>
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Lịch học của tôi</h2>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            <PlusIcon className="w-4 h-4 mr-2" />
-            Tạo Lịch học
-          </button>
-        </div>
-
-        {/* Danh sách Lịch học */}
-        <div className="space-y-4">
-          {schedules.length > 0 ? schedules.map(schedule => (
-            <div key={schedule.id} className="border border-gray-200 rounded-lg p-4 flex items-start justify-between">
-              <div>
-                <div className="flex items-center space-x-3 mb-1">
-                  <h3 className="text-lg font-semibold text-gray-800">{schedule.title}</h3>
-                  <span className={clsx("badge capitalize", statusBadge(schedule.status))}>
-                    {schedule.status.replace('_', ' ')}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mb-2">{schedule.description}</p>
-                <p className="text-xs text-gray-400">
-                  Tạo ngày: {new Date(schedule.created_date).toLocaleDateString('vi-VN')}
-                </p>
-              </div>
-              <div className="flex-shrink-0 flex space-x-1">
-                {/* (Nút Sửa và Chi tiết sẽ làm sau) */}
-                <button 
-                  // onClick={() => handleEdit(schedule)}
-                  className="p-2 rounded-lg text-indigo-600 hover:bg-indigo-50" title="Sửa (chưa làm)">
-                  <PencilIcon className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={() => handleDelete(schedule)}
-                  className="p-2 rounded-lg text-red-600 hover:bg-red-50" title="Xóa">
-                  <TrashIcon className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )) : (
-            <div className="text-center p-8 border border-dashed rounded-lg">
-              <CalendarDaysIcon className="w-12 h-12 mx-auto text-gray-300" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Chưa có Lịch học</h3>
-              <p className="mt-1 text-sm text-gray-500">Hãy bắt đầu bằng cách tạo một lịch học mới.</p>
-            </div>
-          )}
-        </div>
+    <div className="max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Quản lý Lịch học</h2>
+        <button onClick={openCreateModal} className="flex items-center bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-blue-700 shadow-lg"><PlusIcon className="w-5 h-5 mr-2" /> Tạo Lịch Mới</button>
       </div>
-
-      {/* Modal Form */}
+      <div className="space-y-2">
+        {schedules.length > 0 ? schedules.map(schedule => (
+          <ScheduleAccordionItem 
+            key={schedule.id} 
+            schedule={schedule} 
+            onDelete={handleDelete} 
+            onEdit={openEditModal} 
+          />
+        )) : (
+          // ▼▼▼ SỬA LỖI 3: CalendarDaysIcon được dùng ở đây ▼▼▼
+          <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+            <CalendarDaysIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900">Bạn chưa có lịch trình nào</h3>
+            <p className="text-gray-500 mt-2 mb-6">Tạo lịch học mới để bắt đầu.</p>
+            <button onClick={openCreateModal} className="text-blue-600 font-semibold hover:underline">+ Tạo ngay</button>
+          </div>
+        )}
+      </div>
       <ScheduleFormModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSubmit}
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSubmit={handleSave} 
+        initialData={editingSchedule} 
       />
-    </>
+    </div>
   );
 };
