@@ -65,48 +65,73 @@
 // };
 
 // src/pages/blog/components/ArticleCard.tsx
+
 import { Link } from 'react-router-dom';
+import type { FC } from 'react';
 import type { Article } from '../../../types/blog';
-import { EyeIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 interface ArticleCardProps {
   article: Article;
 }
 
-export const ArticleCard = ({ article }: ArticleCardProps) => {
+const stripHtml = (html: string): string =>
+  html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+
+export const ArticleCard: FC<ArticleCardProps> = ({ article }) => {
+  const previewText = stripHtml(article.content).slice(0, 140);
+
+  const keywordList = article.keywords
+    .split(',')
+    .map((k) => k.trim())
+    .filter((k) => k.length > 0)
+    .slice(0, 3);
+
+  const createdAtText = article.publishDate
+    ? new Date(article.publishDate).toLocaleDateString()
+    : '';
+
   return (
-    <div className="group bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-shadow duration-300 hover:shadow-lg">
-      {/* (Bỏ ảnh thumbnail vì APIDocs không có) */}
-      <div className="p-5">
-        <Link to={`/blog/${article.slug}`}>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">
-            {article.title}
-          </h3>
-        </Link>
-        {/* Dùng Subtitle thay cho Excerpt */}
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 h-10 line-clamp-2">
-          {article.subtitle}
-        </p>
-        
-        {/* Dùng Writer thay cho Author */}
-        <div className="flex items-center space-x-2 mb-4">
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-            {article.writer}
-          </span>
-        </div>
-        
-        {/* Stats (Giữ nguyên Views, sửa lại Ngày) */}
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1">
-            <EyeIcon className="w-4 h-4" />
-            {article.views}
-          </span>
-          <span className="flex items-center gap-1">
-            <CalendarDaysIcon className="w-4 h-4" />
-            {new Date(article.publishDate).toLocaleDateString('vi-VN')}
-          </span>
+    <Link
+      to={`/blog/${article.id}`}
+      className="group h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
+    >
+      <div className="h-40 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 relative">
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity bg-white" />
+        <div className="absolute bottom-3 left-4 text-xs text-white/90 font-medium uppercase tracking-wide">
+          Blog EduSmart
         </div>
       </div>
-    </div>
+
+      <div className="flex-1 flex flex-col px-4 py-3">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+          {article.title}
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 line-clamp-1">
+          {article.subtitle}
+        </p>
+
+        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-3">
+          {previewText}
+          {previewText.length === 140 && '...'}
+        </p>
+
+        <div className="mt-auto flex items-center justify-between">
+          <div className="flex flex-wrap gap-1">
+            {keywordList.map((kw) => (
+              <span
+                key={kw}
+                className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+              >
+                #{kw}
+              </span>
+            ))}
+          </div>
+          <div className="text-[10px] text-gray-400 dark:text-gray-500 text-right">
+            {createdAtText && <div>{createdAtText}</div>}
+            <div>{article.views} lượt xem</div>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 };

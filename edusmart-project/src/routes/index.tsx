@@ -39,6 +39,8 @@ import { ExamManagementPage } from '../pages/admin/ExamManagementPage';
 import { ExamCreatePage } from '../pages/admin/ExamCreatePage';
 import { ExamQuestionsPage } from '../pages/admin/ExamQuestionsPage';
 import { BlogManagementPage } from '../pages/admin/BlogManagementPage';
+import { BlogDetailPage } from '../pages/blog/BlogDetailPage';
+import { BlogEditPage } from '../pages/blog/BlogEditPage';
 
 // --- Trang Admin (Dùng Placeholder) ---
 // const AdminDashboardPage = () => <h1 className="text-3xl font-bold">Bảng điều khiển</h1>;
@@ -64,6 +66,8 @@ const router = createBrowserRouter([
       { path: 'exam/detail/:examId', element: <ExamDetailPage /> },
       { path: 'flashcards', element: <FlashcardListPage /> },
       { path: 'blog', element: <BlogListPage /> },
+      { path: 'blog/create', element: <BlogWritePage /> },
+      { path: 'blog/:id', element: <BlogDetailPage/>},
       { path: 'login', element: <LoginPage /> },
       // Route này để đón người dùng từ Backend trở về
       { path: 'oauth2/success', element: <OAuth2RedirectHandler /> },
@@ -77,6 +81,7 @@ const router = createBrowserRouter([
           { path: 'flashcards/:flashcardId', element: <FlashcardStudyPage/> },
           { path: 'flashcards/:flashcardId/study', element: <FlashcardLearnPage />},
           { path: 'blog/create', element: <BlogWritePage /> },
+          { path: 'blog/:id/edit', element: <BlogEditPage/>},
         ],
       },
     ],

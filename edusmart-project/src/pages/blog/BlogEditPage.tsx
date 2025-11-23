@@ -1,17 +1,19 @@
-// src/pages/blog/BlogWritePage.tsx
+// src/pages/blog/BlogEditPage.tsx
 
-import { useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
-import { useAppSelector } from '../../app/hooks';
-import { createOrUpdateBlog } from '../../services/blogService';
-import type { CreateOrUpdateBlogPayload } from '../../services/blogService';
-import { Spinner } from '../../components/ui/Spinner';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+
+import { Spinner } from '../../components/ui/Spinner';
+import { useAppSelector } from '../../app/hooks';
+import { getBlogById, createOrUpdateBlog } from '../../services/blogService';
+import type { CreateOrUpdateBlogPayload } from '../../services/blogService';
+import type { Article } from '../../types/blog';
 
 type BlogFormInputs = {
   title: string;
@@ -30,7 +32,6 @@ const quillModules = {
   ],
 };
 
-// kiểu user cơ bản để tránh any
 interface BasicUser {
   id?: string | number;
   _id?: string | number;
@@ -38,8 +39,11 @@ interface BasicUser {
   name?: string;
 }
 
-export const BlogWritePage = () => {
+export const BlogEditPage = () => {
+  const { id } = useParams<'id'>();
   const navigate = useNavigate();
+  const user = useAppSelector((state) => state.auth.user);
+
   const {
     register,
     handleSubmit,
@@ -47,7 +51,8 @@ export const BlogWritePage = () => {
     formState: { errors, isSubmitting },
   } = useForm<BlogFormInputs>();
 
-  const user = useAppSelector((state) => state.auth.user);
+  const [article, setArticle] = useState<Article | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const quillInstance = useRef<Quill | null>(null);
@@ -56,8 +61,11 @@ export const BlogWritePage = () => {
     register('content', { required: 'Nội dung là bắt buộc' });
   }, [register]);
 
+  // khởi tạo editor + nếu đã có article thì set nội dung
   useEffect(() => {
-    if (editorRef.current && !quillInstance.current) {
+    if (!editorRef.current) return;
+
+    if (!quillInstance.current) {
       quillInstance.current = new Quill(editorRef.current, {
         theme: 'snow',
         modules: quillModules,
@@ -65,16 +73,57 @@ export const BlogWritePage = () => {
 
       quillInstance.current.on('text-change', () => {
         if (quillInstance.current) {
-          const content = quillInstance.current.root.innerHTML;
-          setValue('content', content, { shouldValidate: true });
+          const contentHtml = quillInstance.current.root.innerHTML;
+          setValue('content', contentHtml, { shouldValidate: true });
         }
       });
     }
-  }, [setValue]);
+
+    if (article && quillInstance.current) {
+      quillInstance.current.root.innerHTML = article.content;
+      setValue('content', article.content, { shouldValidate: false });
+    }
+  }, [setValue, article]);
+
+  // load blog theo id
+  useEffect(() => {
+    let isMounted = true;
+
+    const load = async () => {
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const numericId = Number(id);
+        const blog = await getBlogById(numericId);
+        if (isMounted) {
+          setArticle(blog ?? null);
+          if (blog) {
+            setValue('title', blog.title);
+            setValue('subtitle', blog.subtitle);
+            setValue('keywords', blog.keywords);
+          }
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, setValue]);
 
   const onSubmit: SubmitHandler<BlogFormInputs> = async (data) => {
-    if (!user) {
-      alert('Bạn phải đăng nhập để thực hiện việc này.');
+    if (!user || !article) {
+      alert('Không xác định được user hoặc bài viết.');
       return;
     }
 
@@ -83,38 +132,64 @@ export const BlogWritePage = () => {
       basicUser.id ?? basicUser._id ?? basicUser.user_id ?? basicUser.name ?? '';
 
     const payload: CreateOrUpdateBlogPayload = {
+      id: article.id,
       title: data.title,
       subtitle: data.subtitle,
       content: data.content,
       keywords: data.keywords,
       writer: String(rawWriterId),
-      views: 0,
+      views: article.views,
     };
 
     try {
       await createOrUpdateBlog(payload);
-      alert('Đăng bài thành công!');
-      navigate('/blog');
+      alert('Cập nhật bài viết thành công!');
+      navigate(`/blog/${article.id}`);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
-      alert('Đã xảy ra lỗi khi đăng bài.');
+      alert('Đã xảy ra lỗi khi cập nhật bài viết.');
     }
   };
 
-  return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <Link
           to="/blog"
           className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4"
         >
           <ArrowLeftIcon className="w-4 h-4" />
-          Quay lại trang Blog
+          Quay lại Blog
+        </Link>
+        <p className="text-gray-700 dark:text-gray-300">
+          Không tìm thấy bài viết để chỉnh sửa.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <Link
+          to={`/blog/${article.id}`}
+          className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          Quay lại bài viết
         </Link>
 
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-          Tạo bài viết mới
+          Chỉnh sửa bài viết
         </h1>
 
         <form
@@ -122,7 +197,6 @@ export const BlogWritePage = () => {
           className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 space-y-6"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Tiêu đề */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Tiêu đề
@@ -130,14 +204,12 @@ export const BlogWritePage = () => {
               <input
                 {...register('title', { required: 'Tiêu đề là bắt buộc' })}
                 className="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Ví dụ: 7 bí quyết luyện IELTS Speaking hiệu quả"
               />
               {errors.title && (
                 <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>
               )}
             </div>
 
-            {/* Subtitle */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Tiêu đề phụ (Subtitle)
@@ -145,7 +217,6 @@ export const BlogWritePage = () => {
               <input
                 {...register('subtitle', { required: 'Tiêu đề phụ là bắt buộc' })}
                 className="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Mô tả ngắn giúp người đọc hiểu nhanh nội dung"
               />
               {errors.subtitle && (
                 <p className="text-red-500 text-xs mt-1">
@@ -154,7 +225,6 @@ export const BlogWritePage = () => {
               )}
             </div>
 
-            {/* Keywords */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Keywords (phân cách bằng dấu phẩy)
@@ -162,18 +232,10 @@ export const BlogWritePage = () => {
               <input
                 {...register('keywords')}
                 className="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500"
-                placeholder="ielts, speaking, tips"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Ví dụ:{' '}
-                <span className="italic">
-                  ielts, listening, học tiếng anh, luyện thi
-                </span>
-              </p>
             </div>
           </div>
 
-          {/* Editor */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Nội dung chính
@@ -196,7 +258,7 @@ export const BlogWritePage = () => {
               disabled={isSubmitting}
               className="inline-flex items-center justify-center bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow hover:bg-blue-700 transition-colors disabled:bg-gray-400"
             >
-              {isSubmitting ? <Spinner size="sm" /> : 'Đăng bài viết'}
+              {isSubmitting ? <Spinner size="sm" /> : 'Lưu thay đổi'}
             </button>
           </div>
         </form>
