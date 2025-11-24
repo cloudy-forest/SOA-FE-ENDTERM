@@ -216,6 +216,7 @@ import { useState, Fragment } from 'react';
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import clsx from 'clsx';
 import { loginWithUsername, registerWithUsername } from '../../services/authService';
+import bcrypt from 'bcryptjs';
 
 // --- COMPONENT NÚT GOOGLE (Giao diện chuẩn Google Branding Guidelines) ---
 const GoogleLoginButton = ({ onClick }: { onClick: () => void }) => (
@@ -313,25 +314,33 @@ export const LoginPage = () => {
   };
 
   const handleEmailRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isLoading) return;
-    setRegisterError(null);
+      e.preventDefault();
+      if (isLoading) return;
+      setRegisterError(null);
 
-    if (registerPassword !== registerConfirmPassword) {
-      setRegisterError('Mật khẩu xác nhận không khớp.');
-      return;
-    }
+      if (registerPassword !== registerConfirmPassword) {
+        setRegisterError('Mật khẩu xác nhận không khớp.');
+        return;
+      }
 
-    dispatch(authStart());
-    try {
-      const newUserData = await registerWithUsername(registerUsername, registerPassword);
-      dispatch(loginSuccess(newUserData));
-      alert('Đăng ký thành công! Chào mừng bạn!');
-      navigate(redirectUrl, { replace: true }); 
-    } catch (err: unknown) { 
-      if (err instanceof Error) { dispatch(authFailed(err.message)); } 
-      else { dispatch(authFailed('Lỗi không xác định')); }
-    }
+      dispatch(authStart());
+      try {
+        // ▼▼▼ THỦ THUẬT FIX LỖI BACKEND KHÔNG HASH ▼▼▼
+        // Tạo salt và hash password ngay tại frontend
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(registerPassword, salt);
+        
+        // Gửi password đã mã hóa lên server
+        // Server lưu chuỗi này vào DB -> Lúc login sẽ khớp!
+        const newUserData = await registerWithUsername(registerUsername, hashedPassword);
+        
+        dispatch(loginSuccess(newUserData));
+        alert('Đăng ký thành công! Chào mừng bạn!');
+        navigate(redirectUrl, { replace: true }); 
+      } catch (err: unknown) { 
+        if (err instanceof Error) { dispatch(authFailed(err.message)); } 
+        else { dispatch(authFailed('Lỗi không xác định')); }
+      }
   };
 
   return (

@@ -86,11 +86,12 @@ export const FlashcardListPage = () => {
                 {/* Đã đăng nhập: Hiện cả 3 */}
                 <TabPanel className="focus:outline-none"><TabMySets /></TabPanel>
                 <TabPanel className="focus:outline-none"><TabStudying /></TabPanel>
-                <TabPanel className="focus:outline-none"><TabExplore isLoggedIn={isLoggedIn} /></TabPanel>
+                {/* Xóa prop isLoggedIn={isLoggedIn} đi */}
+                <TabPanel className="focus:outline-none"><TabExplore /></TabPanel>
               </>
             ) : (
               // Chưa đăng nhập: Chỉ hiện 1
-              <TabPanel className="focus:outline-none"><TabExplore isLoggedIn={isLoggedIn} /></TabPanel>
+              <TabPanel className="focus:outline-none"><TabExplore /></TabPanel>
             )}
           </TabPanels>
         </TabGroup>

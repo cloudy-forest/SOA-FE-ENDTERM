@@ -1,48 +1,68 @@
 // src/pages/auth/OAuth2RedirectHandler.tsx
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '../../app/hooks';
-// import { setCredentials } from '../../app/slices/authSlice';
+import { loginSuccess, authFailed } from '../../app/slices/authSlice'; // Import action Redux
+import { fetchCurrentUser } from '../../services/auth/loginService'; // Import hàm mới viết
 import { Spinner } from '../../components/ui/Spinner';
 
 export const OAuth2RedirectHandler = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const hasRun = useRef(false); // Tránh chạy 2 lần (React.StrictMode)
 
   useEffect(() => {
-    // Backend thường trả về token qua URL query params
-    // Ví dụ: http://localhost:3000/oauth2/success?token=eyJhbGciOi...
-    // Hãy hỏi Dev Backend xem họ đặt tên param là 'token' hay 'accessToken'
-    const token = searchParams.get('token') || searchParams.get('accessToken');
-    const error = searchParams.get('error');
+    if (hasRun.current) return;
+    hasRun.current = true;
 
-    if (token) {
-      // 1. Lưu token vào Redux (giả sử bạn có hàm decode token để lấy user info, hoặc gọi API lấy profile sau)
-      // Tạm thời lưu token, bạn có thể cần gọi API /users/me ngay sau đây để lấy thông tin user đầy đủ
-      
-      // Lưu vào LocalStorage (nếu authSlice không tự làm)
-      localStorage.setItem('token', token);
+    const handleLogin = async () => {
+      // 1. Lấy token từ URL
+      const token = searchParams.get('token') || searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const error = searchParams.get('error');
 
-      // Cập nhật Redux (Cần dispatch action loginSuccess)
-      // Lưu ý: Nếu authSlice của bạn cần User object ngay, bạn có thể phải fetch user info trước
-      // Đây là ví dụ đơn giản:
-      // dispatch(setCredentials({ user: decodedUser, token: token })); 
-      
-      // Cách tốt nhất: Redirect về trang chủ, App.tsx sẽ tự check token và load user
-      window.location.href = '/'; 
-    } else {
-      console.error('Social login failed', error);
-      navigate('/login?error=social_login_failed');
-    }
+      if (error) {
+        dispatch(authFailed("Đăng nhập Google thất bại."));
+        navigate('/login');
+        return;
+      }
+
+      if (token) {
+        try {
+          // 2. Lưu token
+          localStorage.setItem('token', token);
+          if (refreshToken) localStorage.setItem('refresh_token', refreshToken);
+
+          // 3. Gọi API lấy thông tin User (QUAN TRỌNG)
+          const userProfile = await fetchCurrentUser();
+
+          // 4. Cập nhật Redux
+          dispatch(loginSuccess(userProfile));
+
+          // 5. Chuyển hướng
+          if (userProfile.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        } catch (err) {
+          console.error("Lỗi lấy thông tin user sau khi OAuth:", err);
+          dispatch(authFailed("Không thể lấy thông tin người dùng."));
+          navigate('/login');
+        }
+      } else {
+        navigate('/login');
+      }
+    };
+
+    handleLogin();
   }, [searchParams, navigate, dispatch]);
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="text-center">
-        <Spinner size="lg" />
-        <p className="mt-4 text-gray-600">Đang xử lý đăng nhập...</p>
-      </div>
+    <div className="flex flex-col h-screen items-center justify-center bg-gray-50">
+      <Spinner size="lg" />
+      <p className="mt-4 text-gray-600 font-medium">Đang xác thực tài khoản...</p>
     </div>
   );
 };

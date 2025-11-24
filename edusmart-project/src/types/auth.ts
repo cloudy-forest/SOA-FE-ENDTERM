@@ -9,7 +9,7 @@ export interface UserProfile {
   phone?: string;
   address?: string;
   bannerUrl?: string; // Ảnh bìa
-  balance?: number; // Số dư tài khoản
+  // balance?: number; // Số dư tài khoản
 
 }
 
@@ -23,6 +23,6 @@ export interface UserProfile {
 export interface AuthState {
   user: UserProfile | null;
   token: string | null; // Giữ lại token của bạn
-  status: AuthStatus;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null; // Thêm trường lưu lỗi
 }
